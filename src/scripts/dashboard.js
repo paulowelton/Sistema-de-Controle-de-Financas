@@ -22,8 +22,7 @@ async function getUser(){
 getUser().then (data => {
     if(data){
         const user = data.user[0]
-        const ola = document.querySelector('#ola')
-        ola.innerHTML = `Olá, ${user.name}!`
+        
     }
 })
 
