@@ -22,6 +22,8 @@ const verifyJWT = (event) => {
     return {
       isValid: true,
       decoded: decoded,
+      statusCode:200,
+      body: JSON.stringify({ message: 'Token is valid.'})
     }
 
   } catch (error) {

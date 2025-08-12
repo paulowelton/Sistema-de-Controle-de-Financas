@@ -1,0 +1,40 @@
+modules = ["nodejs-20", "web"]
+run = "netlify dev"
+
+[nix]
+channel = "stable-25_05"
+
+[deployment]
+run = ["sh", "-c", "netlify dev"]
+
+[workflows]
+
+[[workflows.workflow]]
+name = "netlify intall"
+mode = "sequential"
+author = 35662683
+
+[[workflows.workflow.tasks]]
+task = "packager.installForLanguage"
+args = "nodejs"
+
+[[ports]]
+localPort = 3000
+externalPort = 3002
+
+[[ports]]
+localPort = 3999
+externalPort = 3000
+exposeLocalhost = true
+
+[[ports]]
+localPort = 8888
+externalPort = 80
+
+[[ports]]
+localPort = 40969
+externalPort = 3003
+
+[[ports]]
+localPort = 46369
+externalPort = 6000

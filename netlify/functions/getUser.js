@@ -1,4 +1,5 @@
 const {verifyJWT} = require('./auth')
+const { supabase } = require('./supabase');
 
 exports.handler = async (event) => {
     const authResult = verifyJWT(event)
@@ -9,16 +10,26 @@ exports.handler = async (event) => {
             body: JSON.stringify({message: 'Invalid token'})
         }
     }
+        
+    id = authResult.decoded.id
 
-    user = {
-        "name": "paulo",
-        "password": 123
-    }
-    
     try{
+                
+        const { data: user, error } = await supabase
+        .from('Users')
+        .select('*')
+        .eq('id', id)
+
+        if(error){
+            return {
+                statusCode: 400,
+                body: JSON.stringify({message: error})
+            }
+        }
+        
         return {
             statusCode: 200,
-            body: JSON.stringify({message: user})
+            body: JSON.stringify({user: user})
         }
     
     }catch (error){
