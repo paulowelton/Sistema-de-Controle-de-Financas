@@ -1,8 +1,10 @@
 require('dotenv').config()
 const jwt = require('jsonwebtoken')
 
-const verifyJWT = (req) => {
-  const authHeader = req.headers['authorization']
+const verifyJWT = (event) => {
+  const authHeader = event.headers?.authorization || event.headers?.Authorization
+
+  console.log('Authorization header:', authHeader)
 
   if (!authHeader) {
     return {
@@ -21,6 +23,7 @@ const verifyJWT = (req) => {
       isValid: true,
       decoded: decoded,
     }
+
   } catch (error) {
     return {
       isValid: false,

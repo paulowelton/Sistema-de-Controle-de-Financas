@@ -41,7 +41,7 @@ exports.handler = async (req, res) => {
     }
 
     // if database return a empty array, return no data
-    if(!data[0] || data[0].lenght){
+    if(!data || data.lenght === 0){
       return {
           statusCode:401,
           body: JSON.stringify({message: 'sem dados'})

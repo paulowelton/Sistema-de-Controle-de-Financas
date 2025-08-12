@@ -6,7 +6,7 @@ async function login(email, password){
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                name: email,
+                email: email,
                 password: password
             })
         })
@@ -28,6 +28,13 @@ form.addEventListener('submit', async (event) => {
     
     try {
         data = await login(email, password)
+
+        if(!data.token){
+            const msgError = document.querySelector('#msg-error')
+
+            msgError.innerHTML = 'Invalid Credencials'
+            return
+        }
 
         localStorage.setItem('jwt_token', data.token);
         window.location.replace('/dashboard.html');

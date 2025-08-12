@@ -26,13 +26,14 @@
         .logo{
             width: 100px;
             height: 100px;
-            position: absolute;
-            top: 0;
+            /* position: absolute;
+            top: 0; */
         }
 
     </style>
 </head>
 <body class="d-flex flex-column justify-content-center align-items-center w-100 h-100 bg-light">
+    <div>
         <img class="logo" src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2F736x%2Fe8%2F22%2Fd3%2Fe822d3a56e91ba588ccce395ed515bea.jpg&f=1&nofb=1&ipt=e86eb25a2c93dd07f2282cd879e668eb694ff0cc20cc805a664f45b8f8d87d6e" alt="">
     </div>
     <div class="container-login p-3">
@@ -45,6 +46,9 @@
             <div class="mb-3">
                 <label for="password" class="form-label">Senha:</label>
                 <input type="password" class="form-control" id="password" placeholder="Sua Senha" required/>
+            </div>
+            <div class="mb-3">
+                <p class="w-100 text-center text-danger" id="msg-error"></p>
             </div>
             <div class="form-check mb-3">
                 <input type="checkbox" class="form-check-input" id="remember-password">
