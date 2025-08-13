@@ -5,7 +5,7 @@ exports.handler = async (event) => {
     // checking token 
     const authResult = verifyJWT(event)
     
-    // if token is not valid, return 401
+    // if token is not valid, it return 401
     if(!authResult.isValid){
         return {
             statusCode: 401,
@@ -19,10 +19,10 @@ exports.handler = async (event) => {
     try{
         
         // making a query for return all users
-        const { data: user, error } = await supabase
-        .from('Users')
+        const { data: earnings, error } = await supabase
+        .from('Earnings')
         .select('*')
-        .eq('id', id)
+        .eq('user_id', id)
 
         // if some error, return
         if(error){
@@ -35,7 +35,7 @@ exports.handler = async (event) => {
         // returning user
         return {
             statusCode: 200,
-            body: JSON.stringify({user: user})
+            body: JSON.stringify({earnings: earnings})
         }
     
     }catch (error){

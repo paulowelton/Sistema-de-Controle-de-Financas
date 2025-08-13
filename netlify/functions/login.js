@@ -58,7 +58,7 @@ exports.handler = async (req, res) => {
     //if the passwords are the same, return the token to client
     if (match){
       const token = jwt.sign({id: userId}, process.env.JWT_SECRET, {
-        expiresIn: parseInt(process.env.JWT_EXPIRES)
+        expiresIn: '1h'
       })
 
       return{
