@@ -52,10 +52,11 @@ async function getEarnings(){
 getEarnings().then (data => {
     if(data){
         let earnings = data.earnings
+        let amount = 0
         
         const tbodyTransactions = document.querySelector('#tbody-transacoes')
-
         for(let i=0; i < earnings.length; i++){
+            amount += parseInt(earnings[i].value) 
             
             const tr = document.createElement('tr')
 
@@ -67,25 +68,26 @@ getEarnings().then (data => {
             valueCell.textContent = earnings[i].value.toLocaleString('pt-BR', {
                 style: 'currency',
                 currency: 'BRL'
-            });
+            })
             tr.append(valueCell)
             
             const dateCell = document.createElement('td')
             const date = new Date(earnings[i].date);
-            dateCell.textContent = date.toLocaleDateString('pt-BR');
+            dateCell.textContent = date.toLocaleDateString('pt-BR')
             tr.append(dateCell)
-
-            const tdButton = document.createElement('td')
-            const button = document.createElement('button')
             
-            button.textContent = '+'
-            button.classList.add('btn', 'btn-primary', 'btn-transacoes')
-
-            tdButton.append(button)
-            tr.append(tdButton)
+            const methodCell = document.createElement('td')
+            methodCell.textContent = earnings[i].forma_pagamento
+            tr.append(methodCell)
 
             tbodyTransactions.append(tr)
         }
+
+        const amountHTML = document.querySelector('#amount')
+        amountHTML.textContent = amount.toLocaleString('pt-br', {
+            style: 'currency',
+            currency: 'BRL'
+        })
         
     }
 })

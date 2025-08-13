@@ -1,0 +1,9 @@
+// === API ===
+// getUser(), getEarnings()
+
+// === UI ===
+// renderTable(), calculateAmount(), renderAmount()
+
+// === Execução principal ===
+// getUser().then(...)
+// getEarnings().then(...)
