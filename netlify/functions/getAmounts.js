@@ -19,8 +19,8 @@ exports.handler = async (event) => {
     try{
         
         // making a query for return all users
-        const { data: earnings, error } = await supabase
-        .from('Earnings')
+        const { data: amounts, error } = await supabase
+        .from('Amounts')
         .select('*')
         .eq('user_id', id)
 
@@ -35,7 +35,7 @@ exports.handler = async (event) => {
         // returning user
         return {
             statusCode: 200,
-            body: JSON.stringify({earnings: earnings})
+            body: JSON.stringify({amounts: amounts})
         }
     
     }catch (error){
