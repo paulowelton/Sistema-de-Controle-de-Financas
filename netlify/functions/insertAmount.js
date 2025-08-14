@@ -38,6 +38,12 @@ exports.handler = async (event) => {
       statusCode: 200,
       body: JSON.stringify({ message: 'Amount inserted successfully.' })
     }
+  
+  }catch (error) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({message: error})
+    }
   }
 
   
