@@ -14,7 +14,7 @@ exports.handler = async (event) => {
     }
     
     // getting user id
-    id = authResult.decoded.id
+    const id = authResult.decoded.id
 
     try{
         
