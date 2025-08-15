@@ -121,9 +121,52 @@ async function refreshAmounts(){
     if (data){
         let amounts = data.amounts
 
+        let sources = []
+        let values = []
+
+        let sources2 = []
+        let values2 = []
+
+        amounts.forEach(({type, source, value, created_at, payment_method}) => {
+            sources.push(source)
+
+            values.push(value)
+
+            type === 'expense' ? values2.push(value) && sources2.push(source) : console.log('sd')
+        })
+
+        var dataChart = [{
+            values: values,
+            labels: sources,
+            type: 'pie'
+        }]
+
+        var layout = {
+            autosize: true,
+            margin: { t: 0, b: 0, l: 0, r: 0 }
+        }
+
+        var config = {
+            responsive: true,
+            displayModeBar: false
+        }
+
+        Plotly.newPlot(document.querySelector('#pie'), dataChart, layout, config)
+
+        var dataBar = [
+        {
+            x: sources2,
+            y: values2,
+            type: 'bar'
+        }
+        ]
+
+        Plotly.newPlot(document.querySelector('#bar'), dataBar,layout)
+
         showAmounts(amounts)
 
         tableTransactions(amounts)
+
     }
 }
 
@@ -157,7 +200,7 @@ function openAmountRegistration(type){
             cancelButton: "btn btn-secondary ms-2",
         },
         buttonsStyling: false,
-    }).then((result) => {
+    }).then(async (result) => {
         if(result.isConfirmed){
             const value = parseFloat(document.querySelector('#value').value)
             const source = document.querySelector('#source').value
@@ -169,26 +212,25 @@ function openAmountRegistration(type){
                 return
             }
 
-            insertAmount(type, value, source, paymentMethod, description).then((data) => {
-                if (data && data.message === 'Amount inserted successfully.') {
-                    Swal.fire({
-                        icon: 'success',
-                        customClass: {
-                            confirmButton: 'btn btn-primary'
-                        }
-                    })
+            data = await insertAmount(type, value, source, paymentMethod, description)
+            if (data && data.message === 'Amount inserted successfully.') {
+                Swal.fire({
+                    icon: 'success',
+                    customClass: {
+                        confirmButton: 'btn btn-primary'
+                    }
+                })
 
-                    refreshAmounts()
-                }else{
-                    Swal.fire({
-                        icon: 'error',
-                        customClass: {
-                            confirmButton: 'btn btn-primary'
-                        }
-                    })
-                }
-            })
-            
+                refreshAmounts()
+            }else{
+                console.log(data)
+                Swal.fire({
+                    icon: 'error',
+                    customClass: {
+                        confirmButton: 'btn btn-primary'
+                    }
+                })
+            }
         }
     })
 }
@@ -200,67 +242,10 @@ getUser().then((data) => {
 
         document.querySelector("#ola").textContent = `Olá. ${user.name}`
     }
-});
+})
 
 refreshAmounts()
 
 document.querySelector("#btn-add-earning").addEventListener("click", () => openAmountRegistration('earn'))
 document.querySelector("#btn-add-expense").addEventListener("click", () => openAmountRegistration('expense'))
 
-// Dados fake para exemplo — substitua com os reais depois
-const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
-const ganhos = [1200, 1500, 1700, 1400, 1800, 2000];
-const despesas = [800, 900, 1100, 1000, 1200, 1300];
-
-// Gráfico de Linhas
-const ctxLine = document.getElementById('lineChart').getContext('2d');
-new Chart(ctxLine, {
-type: 'line',
-data: {
-    labels: meses,
-    datasets: [
-        {
-            label: 'Ganhos',
-            data: ganhos,
-            borderColor: 'green',
-            backgroundColor: 'rgba(0, 128, 0, 0.1)',
-            tension: 0.3
-        },
-        {
-            label: 'Despesas',
-            data: despesas,
-            borderColor: 'red',
-            backgroundColor: 'rgba(255, 0, 0, 0.1)',
-            tension: 0.3
-        }
-    ]
-},
-options: {
-    responsive: true,
-    scales: {
-        y: {
-            beginAtZero: true
-        }
-    }
-}
-});
-
-// Gráfico de Pizza
-const ctxPie = document.getElementById('pieChart').getContext('2d');
-new Chart(ctxPie, {
-type: 'pie',
-data: {
-    labels: ['Entradas', 'Despesas'],
-    datasets: [{
-        data: [
-            ganhos.reduce((a, b) => a + b, 0),
-            despesas.reduce((a, b) => a + b, 0)
-        ],
-        backgroundColor: ['#198754', '#dc3545'],
-        hoverOffset: 10
-    }]
-},
-options: {
-    responsive: true
-}
-});
