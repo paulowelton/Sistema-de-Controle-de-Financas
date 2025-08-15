@@ -125,9 +125,39 @@
             </div>
         </div>
 
+        <!-- Seção de Gráficos -->
+        <div class="row mb-4">
+            <!-- Gráfico de Linhas -->
+            <div class="col-md-6 mb-3">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Evolução Financeira</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico de Pizza -->
+            <div class="col-md-6 mb-3">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Distribuição de Entradas e Despesas</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
     </main>
-    <script src="src/scripts/dashboard.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="src/scripts/dashboard.js"></script>
 </body>
 </html>

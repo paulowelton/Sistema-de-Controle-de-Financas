@@ -206,3 +206,61 @@ refreshAmounts()
 
 document.querySelector("#btn-add-earning").addEventListener("click", () => openAmountRegistration('earn'))
 document.querySelector("#btn-add-expense").addEventListener("click", () => openAmountRegistration('expense'))
+
+// Dados fake para exemplo — substitua com os reais depois
+const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
+const ganhos = [1200, 1500, 1700, 1400, 1800, 2000];
+const despesas = [800, 900, 1100, 1000, 1200, 1300];
+
+// Gráfico de Linhas
+const ctxLine = document.getElementById('lineChart').getContext('2d');
+new Chart(ctxLine, {
+type: 'line',
+data: {
+    labels: meses,
+    datasets: [
+        {
+            label: 'Ganhos',
+            data: ganhos,
+            borderColor: 'green',
+            backgroundColor: 'rgba(0, 128, 0, 0.1)',
+            tension: 0.3
+        },
+        {
+            label: 'Despesas',
+            data: despesas,
+            borderColor: 'red',
+            backgroundColor: 'rgba(255, 0, 0, 0.1)',
+            tension: 0.3
+        }
+    ]
+},
+options: {
+    responsive: true,
+    scales: {
+        y: {
+            beginAtZero: true
+        }
+    }
+}
+});
+
+// Gráfico de Pizza
+const ctxPie = document.getElementById('pieChart').getContext('2d');
+new Chart(ctxPie, {
+type: 'pie',
+data: {
+    labels: ['Entradas', 'Despesas'],
+    datasets: [{
+        data: [
+            ganhos.reduce((a, b) => a + b, 0),
+            despesas.reduce((a, b) => a + b, 0)
+        ],
+        backgroundColor: ['#198754', '#dc3545'],
+        hoverOffset: 10
+    }]
+},
+options: {
+    responsive: true
+}
+});
