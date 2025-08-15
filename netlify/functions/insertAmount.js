@@ -20,12 +20,12 @@ exports.handler = async (event) => {
 
   const id = decoded.id
 
-  const { type, value, source, forma_pagamento, description } = JSON.parse(event.body)
+  const { type, value, source, paymentMethod, description } = JSON.parse(event.body)
   
   try{
     const { error } = await supabase
     .from('Amounts')
-    .insert({user_id: id, type: type, value: value, source: source, forma_pagamento: forma_pagamento, description: description})
+    .insert({user_id: id, type: type, value: value, source: source, payment_method: paymentMethod, description: description})
 
     if (error){
       return {

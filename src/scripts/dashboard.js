@@ -1,75 +1,59 @@
+// ===================== UTILS =========================
 function invalidToken() {
     alert("Token inválido ou expirado. Por favor, faça login novamente.")
     localStorage.removeItem("jwt_token")
     window.location.replace("/login.html")
 }
 
-// ======================= API =======================
-// route getuser
-async function getUser() {
-    const token = localStorage.getItem("jwt_token");
-    const response = await fetch("/api/getUser", {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            authorization: `Bearer ${token}`,
-        },
+async function fetchApi(url, options = {}){
+    const token = localStorage.getItem("jwt_token")
+    
+    const headers = {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${token}`,
+        ...options.headers
+    }
+
+    const response = await fetch(url, {
+        ...options,
+        headers
     })
 
-    if (response.status === 401) {
+    if (response.status === 401){
         invalidToken()
         return null
     }
 
-    const data = await response.json()
-    return data
+    return response.json()
+}
+
+// ======================= API =======================
+// route getuser
+async function getUser() {
+    return await fetchApi('/api/getUser', {
+        method: 'GET'
+    })
 }
 
 // route getAmounts
 async function getAmounts() {
-    const token = localStorage.getItem("jwt_token");
-    const response = await fetch("/api/getAmounts", {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            authorization: `Bearer ${token}`,
-        },
+    return await fetchApi('/api/getAmounts', {
+        method: 'GET'
     })
-
-    if (response.status === 401) {
-        invalidToken()
-        return null
-    }
-
-    const data = await response.json()
-    return data
 }
 
 //route insertAmount
-async function insertAmount(type, value, source, forma_pagamento, description) {
-    const token = localStorage.getItem("jwt_token");
-    const response = await fetch("/api/insertAmount", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            authorization: `Bearer ${token}`,
-        },
+async function insertAmount(type, value, source, paymentMethod, description) {
+    return await fetchApi('/api/insertAmount', {
+        method: 'POST',
         body: JSON.stringify({
             type: type,
             value: value,
             source: source,
-            forma_pagamento: forma_pagamento,
+            paymentMethod: paymentMethod,
             description: description,
-        }),
-    });
-
-    if (response.status === 401) {
-        invalidToken()
-        return null
-    }
-
-    const data = await response.json()
-    return data;
+        })
+    })
 }
 
 // ======================== UI ========================
@@ -109,42 +93,26 @@ function showAmounts(amounts) {
             style: "currency",
             currency: "BRL",
         },
-    );
+    )
 }
 
 function tableTransactions(amounts) {
     const tbodyTransactions = document.querySelector("#tbody-transacoes")
-    for (let i = 0; i < amounts.length; i++) {
+    tbodyTransactions.innerHTML = ""
+
+    amounts.forEach(({type, source, value, created_at, payment_method}) => {
         const tr = document.createElement("tr")
+        tr.classList.add(type === 'earn' ? 'table-success' : 'table-danger')
 
-        if (amounts[i].type === "earn") {
-            tr.classList.add("table-success")
-        } else {
-            tr.classList.add("table-danger")
-        }
-
-        const descriptionCell = document.createElement("td")
-        descriptionCell.textContent = amounts[i].source
-        tr.append(descriptionCell)
-
-        const valueCell = document.createElement("td");
-        valueCell.textContent = amounts[i].value.toLocaleString("pt-BR", {
-            style: "currency",
-            currency: "BRL",
-        });
-        tr.append(valueCell)
-
-        const dateCell = document.createElement("td")
-        const date = new Date(amounts[i].created_at)
-        dateCell.textContent = date.toLocaleDateString("pt-BR")
-        tr.append(dateCell)
-
-        const methodCell = document.createElement("td")
-        methodCell.textContent = amounts[i].forma_pagamento
-        tr.append(methodCell);
-
-        tbodyTransactions.append(tr)
-    }
+        tr.innerHTML = `
+            <td>${source}</td>
+            <td>${value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</td>
+            <td>${new Date(created_at).toLocaleDateString("pt-BR")}</td>
+            <td>${payment_method}</td>
+        `
+        
+        tbodyTransactions.appendChild(tr)
+    })
 }
 
 async function refreshAmounts(){
@@ -159,20 +127,11 @@ async function refreshAmounts(){
     }
 }
 
-// ======================= MAIN =======================
-getUser().then((data) => {
-    if (data) {
-        const user = data.user[0]
+function openAmountRegistration(type){
+    const title = type === 'earn' ? 'Cadastrar Ganho' : 'Cadastrar Despesa'
 
-        document.querySelector("#ola").textContent = `Olá. ${user.name}`
-    }
-});
-
-refreshAmounts()
-
-document.querySelector("#btn-add-earning").addEventListener("click", () => {
     Swal.fire({
-        title: "Cadastrar Ganho",
+        title: title,
         html: `
         <input type="number" id="value" class="form-control mb-2" placeholder="Valor">
         <select id="source" class="form-select mb-2">
@@ -210,7 +169,7 @@ document.querySelector("#btn-add-earning").addEventListener("click", () => {
                 return
             }
 
-            insertAmount('earn', value, source, paymentMethod, description).then((data) => {
+            insertAmount(type, value, source, paymentMethod, description).then((data) => {
                 if (data && data.message === 'Amount inserted successfully.') {
                     Swal.fire({
                         icon: 'success',
@@ -232,7 +191,18 @@ document.querySelector("#btn-add-earning").addEventListener("click", () => {
             
         }
     })
+}
 
-})
+// ======================= MAIN =======================
+getUser().then((data) => {
+    if (data) {
+        const user = data.user[0]
 
-const btnAddExpense = document.querySelector("#btn-add-expense");
+        document.querySelector("#ola").textContent = `Olá. ${user.name}`
+    }
+});
+
+refreshAmounts()
+
+document.querySelector("#btn-add-earning").addEventListener("click", () => openAmountRegistration('earn'))
+document.querySelector("#btn-add-expense").addEventListener("click", () => openAmountRegistration('expense'))
