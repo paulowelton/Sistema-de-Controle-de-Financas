@@ -27,6 +27,10 @@ async function fetchApi(url, options = {}){
     return response.json()
 }
 
+
+
+
+
 // ======================= API =======================
 // route getuser
 async function getUser() {
@@ -55,6 +59,10 @@ async function insertAmount(type, value, source, paymentMethod, description) {
         })
     })
 }
+
+
+
+
 
 // ======================== UI ========================
 function showAmounts(amounts) {
@@ -115,57 +123,149 @@ function tableTransactions(amounts) {
     })
 }
 
+function pieChart(amounts){
+    let sources = []
+    let values = []
+
+    amounts.forEach(({source, value}) => {
+        sources.push(source)
+
+        values.push(value)
+    })
+
+    var data = [{
+        values: values,
+        labels: sources,
+        type: 'pie'
+    }]
+
+    var layout = {
+        autosize: true,
+        margin: { t: 0, b: 0, l: 0, r: 0 }
+    }
+
+    var config = {
+        responsive: true,
+        displayModeBar: false
+    }
+
+    Plotly.newPlot(document.querySelector('#pie'), data, layout, config)
+}
+
+function barChart(amounts){
+    let sources = []
+    let values = []
+
+    amounts.forEach(({type, source, value}) => {
+        if(type === 'expense'){
+            sources.push(source)
+            values.push(value)
+        }
+    })
+
+    var data = [
+    {
+        x: sources,
+        y: values,
+        type: 'bar'
+    }
+    ]
+
+    var layout = {
+        autosize: true,
+        margin: { t: 30, b: 80, l: 40, r: 20 },
+        xaxis: {
+            tickangle: -45,
+            title: "Fonte"
+        },
+        yaxis: {
+            title: "Valor (R$)"
+        }
+    }
+
+
+    var config = {
+        responsive: true,
+        displayModeBar: false
+    }
+
+    Plotly.newPlot(document.querySelector('#bar'), data ,layout, config)
+}
+
+function timeChart(amounts){
+    let valuesEarnings = []
+    let timeEarnings = []
+    
+    let valuesExpenses = []
+    let timeExpenses = []
+
+    amounts.forEach(({type, value, created_at}) => {
+        if (type == 'earn'){
+            valuesEarnings.push(value)
+            timeEarnings.push(new Date(created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }))
+            
+        }else{
+            valuesExpenses.push(value)
+            timeExpenses.push(new Date(created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }))
+        }
+    })
+
+    var trace1 = {
+        type: "scatter",
+        mode: "lines",
+        name: 'Ganhos',
+        x: timeEarnings,
+        y: valuesEarnings,
+        line: {color: '#17BECF'}
+    }
+    
+    var trace2 = {
+        type: "scatter",
+        mode: "lines",
+        name: 'Despesas',
+        x: timeExpenses,
+        y: valuesExpenses,
+        line: {color: '#0b4950ff'}
+    }
+
+    var data = [trace1, trace2]
+
+    var layout = {
+        autosize: true,
+        margin: { t: 30, b: 80, l: 40, r: 20 },
+        xaxis: {
+            title: "Data"
+        },
+        yaxis: {
+            title: "Valor (R$)"
+        }
+    }
+
+
+    var config = {
+        responsive: true,
+        displayModeBar: false
+    }
+
+    Plotly.newPlot(document.querySelector('#time-chart'), data, layout, config)
+
+}
+
 async function refreshAmounts(){
     const data = await getAmounts()
 
     if (data){
         let amounts = data.amounts
 
-        let sources = []
-        let values = []
-
-        let sources2 = []
-        let values2 = []
-
-        amounts.forEach(({type, source, value, created_at, payment_method}) => {
-            sources.push(source)
-
-            values.push(value)
-
-            type === 'expense' ? values2.push(value) && sources2.push(source) : console.log('sd')
-        })
-
-        var dataChart = [{
-            values: values,
-            labels: sources,
-            type: 'pie'
-        }]
-
-        var layout = {
-            autosize: true,
-            margin: { t: 0, b: 0, l: 0, r: 0 }
-        }
-
-        var config = {
-            responsive: true,
-            displayModeBar: false
-        }
-
-        Plotly.newPlot(document.querySelector('#pie'), dataChart, layout, config)
-
-        var dataBar = [
-        {
-            x: sources2,
-            y: values2,
-            type: 'bar'
-        }
-        ]
-
-        Plotly.newPlot(document.querySelector('#bar'), dataBar,layout)
-
         showAmounts(amounts)
 
         tableTransactions(amounts)
+
+        pieChart(amounts)
+
+        barChart(amounts)
+
+        timeChart(amounts)
 
     }
 }
@@ -234,6 +334,10 @@ function openAmountRegistration(type){
         }
     })
 }
+
+
+
+
 
 // ======================= MAIN =======================
 getUser().then((data) => {
