@@ -19,11 +19,19 @@
             max-height: 400px;
             overflow: auto;
         }
+        .filtro{
+            position: absolute;
+            right: 0;
+            top: 0;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 5px;
+        }
         
         @media (max-width: 700px) { 
             .btn-acoes{
                  display: flex;
-                justify-content: space-between;
+                 justify-content: space-between;
             }
           
         }
@@ -37,7 +45,7 @@
             <a href="#" class="navbar-brand fw-semibold" style="font-size: 22px;">Dashboard</a>
             <div class="d-flex align-items-center">
                 <span class="navbar-text me-3" id="ola"></span>
-                <button class="btn btn-outline-light btn-sm">Log Out</button>
+                <button class="btn btn-outline-light btn-sm log-out">Log Out</button>
             </div>
         </div>
     </nav>
@@ -94,7 +102,7 @@
         </div>
 
         <!-- Botões de Ação -->
-        <div class="mb-4 d-flex gap-2 btn-acoes">
+        <div class="mb-4 d-flex d-flex justify-content-between">
             <button class="btn btn-primary" id="btn-add-earning">
                 <i class="bi bi-plus-circle me-1"></i> Cadastrar Ganho
             </button>
@@ -107,6 +115,7 @@
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-light text-center">
                 <h5 class="mb-0">Últimas Transações</h5>
+                <i class="bi bi-funnel filtro"></i>
             </div>
             <div class="card-body p-0">
                 <table class="table table-hover text-center mb-0">
@@ -143,7 +152,7 @@
             <div class="col-md-6 mb-3">
                 <div class="card shadow-sm">
                     <div class="card-header bg-light text-center">
-                        <h5 class="mb-0">Ranking de Despesas</h5>
+                        <h5 class="mb-0">Ranking de Maiores Movimentações</h5>
                     </div>
                     <div class="card-body" style="height: 300px;">
                         <div class="w-100 h-100 d-flex justify-content-center align-items-center" id="bar"></div>
@@ -170,7 +179,7 @@
 
     <footer class="bg-primary text-center text-lg-start">
         <div class="text-center text-white">
-            © 2020 Copyright:
+            © 2025 Copyright:
             <a class="text-body text-link" href="https://github.com/paulowelton">Paulo Welton</a>
         </div>
     </footer>

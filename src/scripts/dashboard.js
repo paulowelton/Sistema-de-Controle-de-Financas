@@ -1,3 +1,6 @@
+// ======================= VARIABLES =======================
+let filter = 'all'
+
 // ===================== UTILS =========================
 function invalidToken() {
     alert("Token inválido ou expirado. Por favor, faça login novamente.")
@@ -26,6 +29,13 @@ async function fetchApi(url, options = {}){
 
     return response.json()
 }
+
+
+
+
+
+
+
 
 
 
@@ -108,15 +118,17 @@ function tableTransactions(amounts) {
     const tbodyTransactions = document.querySelector("#tbody-transacoes")
     tbodyTransactions.innerHTML = ""
 
-    amounts.forEach(({type, source, value, created_at, payment_method}) => {
+    amounts.forEach(({type, source, value, created_at, payment_method, description}) => {
         const tr = document.createElement("tr")
-        tr.classList.add(type === 'earn' ? 'table-success' : 'table-danger')
+        tr.classList.add(type === 'earn' ? 'table-success' : 'table-danger', 'transaction')
 
         tr.innerHTML = `
             <td>${source}</td>
             <td>${value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</td>
             <td>${new Date(created_at).toLocaleDateString("pt-BR")}</td>
             <td>${payment_method}</td>
+            <td style='display:none;'>${description}</td>
+            
         `
         
         tbodyTransactions.appendChild(tr)
@@ -156,11 +168,11 @@ function barChart(amounts){
     let sources = []
     let values = []
 
-    amounts.forEach(({type, source, value}) => {
-        if(type === 'expense'){
-            sources.push(source)
-            values.push(value)
-        }
+    amounts.forEach(({source, value}) => {
+        
+        sources.push(source)
+        values.push(value)
+        
     })
 
     var data = [
@@ -258,6 +270,19 @@ async function refreshAmounts(){
         let amounts = data.amounts
 
         showAmounts(amounts)
+        
+        if (filter !== 'all'){
+            amounts = amounts.filter(amount => amount.type === filter)
+
+            tableTransactions(amounts)
+
+            pieChart(amounts)
+
+            barChart(amounts)
+
+            timeChart(amounts)
+            
+        }else{
 
         tableTransactions(amounts)
 
@@ -266,6 +291,8 @@ async function refreshAmounts(){
         barChart(amounts)
 
         timeChart(amounts)
+        
+        }
 
     }
 }
@@ -335,10 +362,6 @@ function openAmountRegistration(type){
     })
 }
 
-
-
-
-
 // ======================= MAIN =======================
 getUser().then((data) => {
     if (data) {
@@ -351,5 +374,82 @@ getUser().then((data) => {
 refreshAmounts()
 
 document.querySelector("#btn-add-earning").addEventListener("click", () => openAmountRegistration('earn'))
+
 document.querySelector("#btn-add-expense").addEventListener("click", () => openAmountRegistration('expense'))
 
+document.querySelector("#tbody-transacoes").addEventListener("click", (e) => {
+    const tr = e.target.closest("tr.transaction")
+    if (!tr) return
+
+    Swal.fire({
+        title: 'Detalhes da Transação',
+        html: `
+            <div class='text-start'>
+            <p> <strong>Fonte:</strong> ${tr.children[0].textContent}</p>
+            <p> <strong>Valor:</strong> ${tr.children[1].textContent}</p>
+            <p> <strong>Data:</strong> ${tr.children[2].textContent}</p>
+            <p> <strong>Forma de Pagamento:</strong> ${tr.children[3].textContent}</p>
+            <p> <strong>descricao:</strong> ${tr.children[4].textContent}</p>
+            </div>
+        `,
+        customClass: {
+            confirmButton: "btn btn-primary",
+        }
+    })
+})
+
+document.querySelector('.filtro').addEventListener('click', () => {
+    Swal.fire({
+        title: 'Filtro',
+        html: `
+            <select id="filtro" class="form-select mb-2">
+                <option selected disabled>Selecione o filtro</option>
+                <option>Ganhos</option>
+                <option>Despesas</option>
+                <option>Todos</option>
+            </select>
+        `,
+        showCancelButton: true,
+        confirmButtonText: "Filtrar",
+        cancelButtonText: "Cancelar",
+        customClass: {
+            confirmButton: "btn btn-primary",
+            cancelButton: "btn btn-secondary ms-2",
+        },
+        // logica para quando clicar no botao de confirmar mudar a variavel filter e chamar a funcao refreshAmounts
+        buttonsStyling: false,
+    }).then((result) => {
+        if (result.isConfirmed){
+            const filtro = document.querySelector('#filtro').value
+            
+            if(filtro === 'Ganhos'){
+                filter = 'earn'
+                refreshAmounts()
+            }
+            if(filtro === 'Despesas'){
+                filter = 'expense'
+                refreshAmounts()
+            }
+            if(filtro === 'Todos'){
+                filter = 'all'
+                refreshAmounts()
+            }
+        }
+    })
+})
+
+
+
+
+
+
+
+document.querySelector('.log-out').addEventListener('click', () => {
+    localStorage.removeItem('jwt_token')
+
+    if (localStorage.getItem('jwt_token') === null){
+        alert('Você foi deslogado com sucesso!')
+        window.location.replace('/login.html')
+    }
+    
+})
