@@ -135,7 +135,7 @@ function tableTransactions(amounts) {
     })
 }
 
-function pieChart(amounts){
+function sourceChart(amounts){
     let sources = []
     let values = []
 
@@ -146,14 +146,15 @@ function pieChart(amounts){
     })
 
     var data = [{
-        values: values,
-        labels: sources,
-        type: 'pie'
+        type: 'bar',
+        x: values,
+        y: sources,
+        orientation: 'h'
     }]
 
     var layout = {
         autosize: true,
-        margin: { t: 0, b: 0, l: 0, r: 0 }
+        margin: { t: 0, b: 0, l: 80, r: 10 }
     }
 
     var config = {
@@ -161,27 +162,26 @@ function pieChart(amounts){
         displayModeBar: false
     }
 
-    Plotly.newPlot(document.querySelector('#pie'), data, layout, config)
+    Plotly.newPlot(document.querySelector('#bar1'), data, layout, config)
 }
 
-function barChart(amounts){
-    let sources = []
+function timeBarChart(amounts){
+    let dates = []
     let values = []
 
-    amounts.forEach(({source, value}) => {
-        
-        sources.push(source)
+    amounts.forEach(({value, created_at}) => {
+        const data = new Date(created_at)
+
+        dates.push(data.toLocaleDateString('pt-BR'))
         values.push(value)
         
     })
 
-    var data = [
-    {
-        x: sources,
+    var data = [{
+        x: dates,
         y: values,
         type: 'bar'
-    }
-    ]
+    }]
 
     var layout = {
         autosize: true,
@@ -204,65 +204,6 @@ function barChart(amounts){
     Plotly.newPlot(document.querySelector('#bar'), data ,layout, config)
 }
 
-function timeChart(amounts){
-    let valuesEarnings = []
-    let timeEarnings = []
-    
-    let valuesExpenses = []
-    let timeExpenses = []
-
-    amounts.forEach(({type, value, created_at}) => {
-        if (type == 'earn'){
-            valuesEarnings.push(value)
-            timeEarnings.push(new Date(created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }))
-            
-        }else{
-            valuesExpenses.push(value)
-            timeExpenses.push(new Date(created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }))
-        }
-    })
-
-    var trace1 = {
-        type: "scatter",
-        mode: "lines",
-        name: 'Ganhos',
-        x: timeEarnings,
-        y: valuesEarnings,
-        line: {color: '#17BECF'}
-    }
-    
-    var trace2 = {
-        type: "scatter",
-        mode: "lines",
-        name: 'Despesas',
-        x: timeExpenses,
-        y: valuesExpenses,
-        line: {color: '#0b4950ff'}
-    }
-
-    var data = [trace1, trace2]
-
-    var layout = {
-        autosize: true,
-        margin: { t: 30, b: 80, l: 40, r: 20 },
-        xaxis: {
-            title: "Data"
-        },
-        yaxis: {
-            title: "Valor (R$)"
-        }
-    }
-
-
-    var config = {
-        responsive: true,
-        displayModeBar: false
-    }
-
-    Plotly.newPlot(document.querySelector('#time-chart'), data, layout, config)
-
-}
-
 async function refreshAmounts(){
     const data = await getAmounts()
 
@@ -276,21 +217,17 @@ async function refreshAmounts(){
 
             tableTransactions(amounts)
 
-            pieChart(amounts)
+            sourceChart(amounts)
 
-            barChart(amounts)
-
-            timeChart(amounts)
+            timeBarChart(amounts)
             
         }else{
 
         tableTransactions(amounts)
 
-        pieChart(amounts)
+        sourceChart(amounts)
 
-        barChart(amounts)
-
-        timeChart(amounts)
+        timeBarChart(amounts)
         
         }
 
