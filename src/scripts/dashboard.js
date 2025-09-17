@@ -297,69 +297,125 @@ async function refreshAmounts(){
     }
 }
 
-function openAmountRegistration(type){
-    const title = type === 'earn' ? 'Cadastrar Ganho' : 'Cadastrar Despesa'
+function openAmountRegistration() {
+  Swal.fire({
+    title: 'Selecione o Tipo',
+    html: `
+      <button id="btn-earn" class="btn btn-primary m-2">Adicionar Ganhos</button>
+      <button id="btn-expense" class="btn btn-danger m-2">Adicionar Despesas</button>
+    `,
+    showConfirmButton: false,
+    showCancelButton: true,
+    cancelButtonText: 'Fechar',
+    buttonsStyling: false,
+    customClass: {
+      container: 'custom-swal-container',
+      cancelButton: 'btn btn-secondary',
+    },
+    didOpen: () => {
+      // Add event listeners to the buttons after the first modal is opened
+      document.getElementById('btn-earn').addEventListener('click', () => {
+        Swal.close(); // Close the first modal
+        openRegistrationForm('earn'); // Open the form for earnings
+      });
 
-    Swal.fire({
-        title: title,
-        html: `
-        <input type="number" id="value" class="form-control mb-2" placeholder="Valor">
-        <select id="source" class="form-select mb-2">
-          <option selected disabled>Fonte</option>
-          <option>Salário</option>
-          <option>Freelance</option>
-          <option>Outro</option>
-        </select>
-        <select type="text" id="paymentMethod" class="form-select mb-2">
-          <option selected disabled>Forma de Pagamento</option>
-          <option>Pix</option>
-          <option>Crédito</option>
-          <option>Débito</option>
-          <option>Boleto</option>
-        </select>
-        <textarea id="description" class="form-control" placeholder="Descrição"></textarea>
-      `,
-        showCancelButton: true,
-        confirmButtonText: "Cadastrar",
-        cancelButtonText: "Cancelar",
-        customClass: {
-            confirmButton: "btn btn-primary",
-            cancelButton: "btn btn-secondary ms-2",
-        },
-        buttonsStyling: false,
-    }).then(async (result) => {
-        if(result.isConfirmed){
-            const value = parseFloat(document.querySelector('#value').value)
-            const source = document.querySelector('#source').value
-            const paymentMethod = document.querySelector('#paymentMethod').value
-            const description = document.querySelector('#description').value
-            
-            if (!value || !source || !paymentMethod) {
-                Swal.fire("Erro", "Preencha todos os campos obrigatórios.", "error");
-                return
+      document.getElementById('btn-expense').addEventListener('click', () => {
+        Swal.close(); // Close the first modal
+        openRegistrationForm('expense'); // Open the form for expenses
+      });
+    }
+  });
+}
+
+function openRegistrationForm(type) {
+  const title = type === 'earn' ? 'Cadastrar Ganho' : 'Cadastrar Despesa';
+
+  Swal.fire({
+    title: title,
+    html: `
+      <input type="number" id="value" class="form-control mb-2" placeholder="Valor">
+      <select id="source" class="form-select mb-2">
+        <option selected disabled>Fonte</option>
+        <option>Salário</option>
+        <option>Freelance</option>
+        <option>Outro</option>
+      </select>
+      <select id="paymentMethod" class="form-select mb-2">
+        <option selected disabled>Forma de Pagamento</option>
+        <option>Pix</option>
+        <option>Crédito</option>
+        <option>Débito</option>
+        <option>Boleto</option>
+      </select>
+      <textarea id="description" class="form-control" placeholder="Descrição"></textarea>
+    `,
+    showCancelButton: true,
+    confirmButtonText: "Cadastrar",
+    cancelButtonText: "Cancelar",
+    customClass: {
+      confirmButton: "btn btn-primary",
+      cancelButton: "btn btn-secondary ms-2",
+    },
+    buttonsStyling: false,
+    preConfirm: () => {
+      // Input validation before the form is submitted
+      const value = parseFloat(document.querySelector('#value').value);
+      const source = document.querySelector('#source').value;
+      const paymentMethod = document.querySelector('#paymentMethod').value;
+      
+      if (!value || isNaN(value) || !source || !paymentMethod || source === 'Fonte' || paymentMethod === 'Forma de Pagamento') {
+        Swal.showValidationMessage('Preencha todos os campos obrigatórios.');
+        return false;
+      }
+      
+      return {
+        value: value,
+        source: source,
+        paymentMethod: paymentMethod,
+        description: document.querySelector('#description').value
+      };
+    }
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      const { value, source, paymentMethod, description } = result.value;
+      
+      try {
+        const data = await insertAmount(type, value, source, paymentMethod, description);
+        
+        if (data && data.message === 'Amount inserted successfully.') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Sucesso!',
+            text: 'Dados cadastrados com sucesso.',
+            customClass: {
+              confirmButton: 'btn btn-primary'
             }
-
-            data = await insertAmount(type, value, source, paymentMethod, description)
-            if (data && data.message === 'Amount inserted successfully.') {
-                Swal.fire({
-                    icon: 'success',
-                    customClass: {
-                        confirmButton: 'btn btn-primary'
-                    }
-                })
-
-                refreshAmounts()
-            }else{
-                console.log(data)
-                Swal.fire({
-                    icon: 'error',
-                    customClass: {
-                        confirmButton: 'btn btn-primary'
-                    }
-                })
+          });
+          refreshAmounts();
+        } else {
+          console.error(data);
+          Swal.fire({
+            icon: 'error',
+            title: 'Erro!',
+            text: 'Ocorreu um erro ao cadastrar os dados.',
+            customClass: {
+              confirmButton: 'btn btn-primary'
             }
+          });
         }
-    })
+      } catch (error) {
+        console.error('Erro na chamada da API:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro de Conexão!',
+          text: 'Não foi possível se conectar ao servidor.',
+          customClass: {
+            confirmButton: 'btn btn-primary'
+          }
+        });
+      }
+    }
+  });
 }
 
 // ======================= MAIN =======================
@@ -373,9 +429,7 @@ getUser().then((data) => {
 
 refreshAmounts()
 
-document.querySelector("#btn-add-earning").addEventListener("click", () => openAmountRegistration('earn'))
-
-document.querySelector("#btn-add-expense").addEventListener("click", () => openAmountRegistration('expense'))
+document.querySelector(".adicionar").addEventListener("click", () => openAmountRegistration())
 
 document.querySelector("#tbody-transacoes").addEventListener("click", (e) => {
     const tr = e.target.closest("tr.transaction")

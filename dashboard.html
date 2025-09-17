@@ -27,6 +27,29 @@
             font-size: 20px;
             padding: 5px;
         }
+        .adicionar{
+            position: absolute;
+            left: 0;
+            top: 0;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 5px;
+        }
+
+        .btn-investimentos{
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            margin: 10px;
+            font-size: 20px;
+            color: white;
+        }
         
         @media (max-width: 700px) { 
             .btn-acoes{
@@ -54,7 +77,7 @@
     <main class="container mt-4">
 
         <!-- Cards -->
-        <div class="row">
+        <div class="row mb-4">
             <!-- Saldo Atual -->
             <div class="col-md-4 mb-3">
                 <div class="card border-0 shadow-sm">
@@ -101,7 +124,7 @@
             </div>
         </div>
 
-        <!-- Botões de Ação -->
+        <!-- Botões de Ação
         <div class="mb-4 d-flex d-flex justify-content-between">
             <button class="btn btn-primary" id="btn-add-earning">
                 <i class="bi bi-plus-circle me-1"></i> Cadastrar Ganho
@@ -109,11 +132,12 @@
             <button class="btn btn-primary" id="btn-add-expense">
                 <i class="bi bi-dash-circle me-1"></i> Cadastrar Despesa
             </button>
-        </div>
+        </div> -->
 
         <!-- Tabela de Transações -->
         <div class="card shadow-sm mb-4">
-            <div class="card-header bg-light text-center">
+            <div class="card-header bg-light text-center ">
+                <i class="bi bi-plus-circle adicionar"></i>
                 <h5 class="mb-0">Últimas Transações</h5>
                 <i class="bi bi-funnel filtro"></i>
             </div>
@@ -180,9 +204,13 @@
     <footer class="bg-primary text-center text-lg-start">
         <div class="text-center text-white">
             © 2025 Copyright:
-            <a class="text-body text-link" href="https://github.com/paulowelton">Paulo Welton</a>
+            <a class="text-body text-white" href="https://github.com/paulowelton">Paulo Welton</a>
         </div>
     </footer>
+
+    <a href="/investimentos.html" class="bg-primary card shadow-sm btn-investimentos">
+        <i class="bi bi-clipboard2-data"></i>
+    </a>
     
     <script src="https://cdn.plot.ly/plotly-3.1.0.min.js" charset="utf-8"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
