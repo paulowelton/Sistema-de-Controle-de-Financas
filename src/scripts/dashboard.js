@@ -30,17 +30,6 @@ async function fetchApi(url, options = {}){
     return response.json()
 }
 
-
-
-
-
-
-
-
-
-
-
-
 // ======================= API =======================
 // route getuser
 async function getUser() {
@@ -70,9 +59,14 @@ async function insertAmount(type, value, source, paymentMethod, description) {
     })
 }
 
-
-
-
+async function deleteAmount(id) {
+  return await fetchApi('/api/deleteAmount', {
+    method: 'POST',
+    body: JSON.stringify({
+      id: id
+    })
+  })
+}
 
 // ======================== UI ========================
 function showAmounts(amounts) {
@@ -118,17 +112,17 @@ function tableTransactions(amounts) {
     const tbodyTransactions = document.querySelector("#tbody-transacoes")
     tbodyTransactions.innerHTML = ""
 
-    amounts.forEach(({type, source, value, created_at, payment_method, description}) => {
+    amounts.forEach(({id, type, source, value, created_at, payment_method, description}) => {
         const tr = document.createElement("tr")
         tr.classList.add(type === 'earn' ? 'table-success' : 'table-danger', 'transaction')
 
         tr.innerHTML = `
+            <td style='display:none;'>${id}</td>
             <td>${source}</td>
             <td>${value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</td>
             <td>${new Date(created_at).toLocaleDateString("pt-BR")}</td>
             <td>${payment_method}</td>
             <td style='display:none;'>${description}</td>
-            
         `
         
         tbodyTransactions.appendChild(tr)
@@ -186,15 +180,7 @@ function timeBarChart(amounts){
     var layout = {
         autosize: true,
         margin: { t: 30, b: 80, l: 40, r: 20 },
-        xaxis: {
-            tickangle: -45,
-            title: "Fonte"
-        },
-        yaxis: {
-            title: "Valor (R$)"
-        }
     }
-
 
     var config = {
         responsive: true,
@@ -250,18 +236,17 @@ function openAmountRegistration() {
       cancelButton: 'btn btn-secondary',
     },
     didOpen: () => {
-      // Add event listeners to the buttons after the first modal is opened
       document.getElementById('btn-earn').addEventListener('click', () => {
-        Swal.close(); // Close the first modal
-        openRegistrationForm('earn'); // Open the form for earnings
-      });
+        Swal.close() 
+        openRegistrationForm('earn')
+      })
 
       document.getElementById('btn-expense').addEventListener('click', () => {
-        Swal.close(); // Close the first modal
-        openRegistrationForm('expense'); // Open the form for expenses
-      });
+        Swal.close()
+        openRegistrationForm('expense') 
+      })
     }
-  });
+  })
 }
 
 function openRegistrationForm(type) {
@@ -327,29 +312,13 @@ function openRegistrationForm(type) {
             customClass: {
               confirmButton: 'btn btn-primary'
             }
-          });
-          refreshAmounts();
+          })
+          refreshAmounts()
         } else {
-          console.error(data);
-          Swal.fire({
-            icon: 'error',
-            title: 'Erro!',
-            text: 'Ocorreu um erro ao cadastrar os dados.',
-            customClass: {
-              confirmButton: 'btn btn-primary'
-            }
-          });
+          console.error(data)
         }
       } catch (error) {
-        console.error('Erro na chamada da API:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Erro de Conexão!',
-          text: 'Não foi possível se conectar ao servidor.',
-          customClass: {
-            confirmButton: 'btn btn-primary'
-          }
-        });
+        console.error('Erro na chamada da API:', error)
       }
     }
   });
@@ -376,18 +345,38 @@ document.querySelector("#tbody-transacoes").addEventListener("click", (e) => {
         title: 'Detalhes da Transação',
         html: `
             <div class='text-start'>
-            <p> <strong>Fonte:</strong> ${tr.children[0].textContent}</p>
-            <p> <strong>Valor:</strong> ${tr.children[1].textContent}</p>
-            <p> <strong>Data:</strong> ${tr.children[2].textContent}</p>
-            <p> <strong>Forma de Pagamento:</strong> ${tr.children[3].textContent}</p>
-            <p> <strong>descricao:</strong> ${tr.children[4].textContent}</p>
+            <p> <strong>Fonte:</strong> ${tr.children[1].textContent}</p>
+            <p> <strong>Valor:</strong> ${tr.children[2].textContent}</p>
+            <p> <strong>Data:</strong> ${tr.children[3].textContent}</p>
+            <p> <strong>Forma de Pagamento:</strong> ${tr.children[4].textContent}</p>
+            <p> <strong>descricao:</strong> ${tr.children[5].textContent}</p>
             </div>
         `,
+        showDenyButton: true,
+        denyButtonText: "Apagar",
         customClass: {
             confirmButton: "btn btn-primary",
         }
+    }).then(async (result) => {
+      if (result.isDenied){
+        
+        try{
+          const data = await deleteAmount(tr.children[0].textContent)
+
+          if (data && data.message == 'success'){
+            Swal.fire("", "", "success")
+
+            refreshAmounts()
+          }else{
+            console.log(data)
+          }
+        }catch (error){
+          console.log(error)
+        }
+      }
     })
-})
+
+  })
 
 document.querySelector('.filtro').addEventListener('click', () => {
     Swal.fire({
@@ -428,12 +417,6 @@ document.querySelector('.filtro').addEventListener('click', () => {
         }
     })
 })
-
-
-
-
-
-
 
 document.querySelector('.log-out').addEventListener('click', () => {
     localStorage.removeItem('jwt_token')
