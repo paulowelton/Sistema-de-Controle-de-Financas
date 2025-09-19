@@ -47,6 +47,6 @@ exports.handler = async (req) => {
         return {
             statusCode: 500,
             body: JSON.stringify({ message: 'Ocorreu um erro interno no servidor.', error: error.message })
-        };
+        }
     }
-};
+}

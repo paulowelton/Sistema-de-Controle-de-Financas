@@ -1,12 +1,11 @@
-// ======================= VARIABLES =======================
-let filter = 'all'
-
-// ===================== UTILS =========================
-function invalidToken() {
+export function invalidToken() {
     alert("Token inválido ou expirado. Por favor, faça login novamente.")
     localStorage.removeItem("jwt_token")
-    window.location.replace("/login.html")
+    window.location.replace("/src/pages/login/login.html")
 }
+
+// ======================= VARIABLES =======================
+let filter = 'all'
 
 async function fetchApi(url, options = {}){
     const token = localStorage.getItem("jwt_token")
@@ -70,41 +69,36 @@ async function deleteAmount(id) {
 
 // ======================== UI ========================
 function showAmounts(amounts) {
-    let earnings = 0
-    let expenses = 0
+    const earnings = amounts.filter(amount => amount.type === 'earn')
+    .reduce((sum, amount) => sum + amount.value, 0)
 
-    for (let i = 0; i < amounts.length; i++) {
-        if (amounts[i].type === "earn") {
-            earnings += amounts[i].value
-        } else {
-            expenses += amounts[i].value
-        }
-    }
+    const expenses = amounts.filter(amount => amount.type === 'expense')
+    .reduce((sum, amount) => sum + amount.value, 0)
 
-    let total = earnings - expenses
+    const total = earnings - expenses
 
     document.querySelector("#amount").textContent = total.toLocaleString(
         "pt-BR",
         {
             style: "currency",
             currency: "BRL",
-        },
-    );
+        }
+    )
 
     document.querySelector("#earnings").textContent = earnings.toLocaleString(
         "pt-BR",
         {
             style: "currency",
             currency: "BRL",
-        },
-    );
+        }
+    )
 
     document.querySelector("#expenses").textContent = expenses.toLocaleString(
         "pt-BR",
         {
             style: "currency",
             currency: "BRL",
-        },
+        }
     )
 }
 
@@ -130,14 +124,8 @@ function tableTransactions(amounts) {
 }
 
 function sourceChart(amounts){
-    let sources = []
-    let values = []
-
-    amounts.forEach(({source, value}) => {
-        sources.push(source)
-
-        values.push(value)
-    })
+    let sources = amounts.map(({ source }) => source)
+    let values = amounts.map(({ value }) => value)
 
     var data = [{
         type: 'bar',
@@ -160,16 +148,12 @@ function sourceChart(amounts){
 }
 
 function timeBarChart(amounts){
-    let dates = []
-    let values = []
-
-    amounts.forEach(({value, created_at}) => {
-        const data = new Date(created_at)
-
-        dates.push(data.toLocaleDateString('pt-BR'))
-        values.push(value)
-        
+    let dates = amounts.map(({ created_at}) => {
+      const date = new Date(created_at)
+      return date.toLocaleDateString('pt-BR')
     })
+
+    let values = amounts.map(({ value }) => value)
 
     var data = [{
         x: dates,
@@ -200,22 +184,13 @@ async function refreshAmounts(){
         
         if (filter !== 'all'){
             amounts = amounts.filter(amount => amount.type === filter)
-
-            tableTransactions(amounts)
-
-            sourceChart(amounts)
-
-            timeBarChart(amounts)
-            
-        }else{
+        }
 
         tableTransactions(amounts)
 
         sourceChart(amounts)
 
         timeBarChart(amounts)
-        
-        }
 
     }
 }
@@ -396,7 +371,6 @@ document.querySelector('.filtro').addEventListener('click', () => {
             confirmButton: "btn btn-primary",
             cancelButton: "btn btn-secondary ms-2",
         },
-        // logica para quando clicar no botao de confirmar mudar a variavel filter e chamar a funcao refreshAmounts
         buttonsStyling: false,
     }).then((result) => {
         if (result.isConfirmed){

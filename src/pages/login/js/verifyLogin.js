@@ -16,7 +16,6 @@ async function login(email, password){
         return data
 }
 
-
 const form = document.querySelector('#form')
 
 form.addEventListener('submit', async (event) => {
@@ -37,7 +36,7 @@ form.addEventListener('submit', async (event) => {
         }
 
         localStorage.setItem('jwt_token', data.token);
-        window.location.replace('/dashboard.html');
+        window.location.replace('/src/pages/dashboard/dashboard.html');
     
     }catch (error) {
 
